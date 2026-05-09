@@ -1,6 +1,5 @@
 const CACHE = 'ironlog-v1';
-const ASSETS = ['/', '/index.html', '/manifest.json'];
-
+const ASSETS = ['/ironlog/', '/ironlog/index.html', '/ironlog/manifest.json'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
   self.skipWaiting();
