@@ -12,8 +12,36 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;background:#0d0d0d;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-.app{background:#141414;min-height:100vh;max-width:430px;margin:0 auto;color:#e8e8e8;display:flex;flex-direction:column}
+html,body{height:100%;background:#0d0d0d;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
+
+/* ── SPLASH ── */
+#splash{position:fixed;inset:0;background:#0d0d0d;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:transform 0.6s cubic-bezier(0.76,0,0.24,1),opacity 0.6s ease}
+#splash.hide{transform:translateY(-100%);opacity:0;pointer-events:none}
+.splash-logo{display:flex;flex-direction:column;align-items:center;gap:16px;animation:bounceIn 0.9s cubic-bezier(0.36,0.07,0.19,0.97) both}
+.splash-icon{width:80px;height:80px;background:#c8ff00;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:0 0 60px rgba(200,255,0,0.35)}
+.splash-name{font-size:32px;font-weight:700;color:#fff;letter-spacing:0.5px}
+.splash-sub{font-size:14px;color:#555;margin-top:-8px;letter-spacing:1px}
+.splash-bar-wrap{margin-top:48px;width:120px;height:2px;background:#1e1e1e;border-radius:2px;overflow:hidden}
+.splash-bar{height:2px;background:#c8ff00;border-radius:2px;animation:loadBar 1.1s ease forwards}
+
+@keyframes bounceIn{
+  0%{transform:translateY(60px) scale(0.85);opacity:0}
+  50%{transform:translateY(-18px) scale(1.05);opacity:1}
+  70%{transform:translateY(8px) scale(0.97)}
+  85%{transform:translateY(-5px) scale(1.01)}
+  100%{transform:translateY(0) scale(1)}
+}
+@keyframes loadBar{
+  0%{width:0}
+  60%{width:80%}
+  100%{width:100%}
+}
+
+/* ── APP ── */
+.app{background:#141414;min-height:100vh;max-width:430px;margin:0 auto;color:#e8e8e8;display:flex;flex-direction:column;transform:translateY(40px);opacity:0;transition:transform 0.6s cubic-bezier(0.22,1,0.36,1),opacity 0.5s ease}
+.app.visible{transform:translateY(0);opacity:1}
+body.ready{overflow:auto}
+
 .topbar{padding:54px 16px 10px;border-bottom:0.5px solid #2a2a2a;flex-shrink:0}
 .topbar h1{font-size:22px;font-weight:600;color:#fff;letter-spacing:0.3px}
 .topbar p{font-size:12px;color:#888;margin-top:2px}
@@ -57,20 +85,34 @@ html,body{height:100%;background:#0d0d0d;font-family:-apple-system,BlinkMacSyste
 .ex-card{background:#1e1e1e;border-radius:14px;padding:12px 14px;margin-bottom:8px;border:0.5px solid #2e2e2e;display:flex;justify-content:space-between;align-items:center}
 .ex-name{font-size:14px;font-weight:500;color:#e8e8e8}
 .ex-sub{font-size:12px;color:#666;margin-top:3px}
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#c8ff00;color:#0a0a0a;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#c8ff00;color:#0a0a0a;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:9999;white-space:nowrap}
 .toast.show{opacity:1}
 .cal-ring-wrap{display:flex;justify-content:center;padding:10px 0 8px}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 .key-banner{background:#1a1a2e;border:0.5px solid #2a2a44;border-radius:14px;padding:14px;margin-bottom:14px}
 .key-banner-title{font-size:14px;font-weight:600;color:#c8ff00;margin-bottom:4px}
 .key-banner-sub{font-size:12px;color:#777;margin-bottom:10px}
-.key-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 .change-key-btn{background:none;border:0.5px solid #333;border-radius:8px;color:#666;font-size:11px;padding:5px 10px;cursor:pointer;font-family:inherit;margin-top:6px}
-.change-key-btn:hover{color:#aaa;border-color:#555}
 </style>
 </head>
 <body>
-<div class="app">
+
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <div class="splash-logo">
+    <div class="splash-icon">⚡</div>
+    <div>
+      <div class="splash-name">IronLog</div>
+      <div class="splash-sub">TRACK · LIFT · GROW</div>
+    </div>
+  </div>
+  <div class="splash-bar-wrap">
+    <div class="splash-bar"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="mainApp">
   <div class="topbar">
     <h1>IronLog</h1>
     <p id="topdate"></p>
@@ -143,12 +185,12 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <!-- AI WORKOUT COACH -->
     <div class="screen" id="s-aiworkout">
       <div class="key-banner" id="aw-key-banner">
-        <div class="key-banner-title">Claude API key required</div>
-        <div class="key-banner-sub">Get a free key at console.anthropic.com — paste it below and it's saved to your device</div>
-        <input class="di" id="claude-key-input" placeholder="sk-ant-..." style="margin-bottom:8px;font-size:13px">
+        <div class="key-banner-title">Groq API key required</div>
+        <div class="key-banner-sub">Free forever at console.groq.com — sign in with Google, create a key, paste below.</div>
+        <input class="di" id="groq-key-input" placeholder="gsk_..." style="margin-bottom:8px;font-size:13px">
         <button class="bp" style="margin-bottom:0;padding:11px" onclick="saveKey()">Save key</button>
       </div>
-      <div id="key-saved-row" style="display:none;margin-bottom:14px;display:none">
+      <div id="key-saved-row" style="display:none;margin-bottom:14px">
         <button class="change-key-btn" onclick="resetKey()"><i class="ti ti-key" style="font-size:12px;vertical-align:-1px;margin-right:4px"></i>Change API key</button>
       </div>
       <div class="card">
@@ -271,19 +313,33 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <div class="toast" id="toast"></div>
 
 <script>
+// ── Splash ────────────────────────────────────────────
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hide');
+    setTimeout(() => {
+      document.getElementById('mainApp').classList.add('visible');
+      document.body.classList.add('ready');
+    }, 200);
+  }, 1600);
+});
+
+// ── Date ──────────────────────────────────────────────
 const dnames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const mnames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const now=new Date();
 const todayKey=now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
 document.getElementById('topdate').textContent=dnames[now.getDay()]+', '+mnames[now.getMonth()]+' '+now.getDate();
 
+// ── Storage ───────────────────────────────────────────
 function save(key,val){try{localStorage.setItem('ironlog_'+key,JSON.stringify(val));}catch(e){}}
 function load(key,def){try{const v=localStorage.getItem('ironlog_'+key);return v!=null?JSON.parse(v):def;}catch(e){return def;}}
 
+// ── State ─────────────────────────────────────────────
 let exercises=load('exercises_'+todayKey,[]);
 let foods=load('foods_'+todayKey,[]);
 let calGoal=load('calGoal',2000);
-let claudeKey=load('claudeKey','');
+let groqKey=load('groqKey','');
 
 document.getElementById('cal-goal-input').value=calGoal;
 document.getElementById('cal-goal-lbl').textContent=calGoal;
@@ -312,42 +368,33 @@ if(savedAN.goal)document.getElementById('an-goal').value=savedAN.goal;
 if(savedAN.activity)document.getElementById('an-activity').value=savedAN.activity;
 if(savedAN.diet)document.getElementById('an-diet').value=savedAN.diet;
 
+// ── Key UI ────────────────────────────────────────────
 function updateKeyUI(){
-  const banner=document.getElementById('aw-key-banner');
-  const savedRow=document.getElementById('key-saved-row');
-  if(claudeKey){
-    banner.style.display='none';
-    savedRow.style.display='block';
-  } else {
-    banner.style.display='block';
-    savedRow.style.display='none';
-  }
+  document.getElementById('aw-key-banner').style.display=groqKey?'none':'block';
+  document.getElementById('key-saved-row').style.display=groqKey?'block':'none';
 }
 
 function saveKey(){
-  const k=document.getElementById('claude-key-input').value.trim();
+  const k=document.getElementById('groq-key-input').value.trim();
   if(!k){showToast('Paste your API key first');return;}
-  claudeKey=k;
-  save('claudeKey',k);
-  updateKeyUI();
-  showToast('API key saved!');
+  groqKey=k;save('groqKey',k);updateKeyUI();showToast('API key saved!');
 }
 
 function resetKey(){
   if(!confirm('Reset your API key?'))return;
-  claudeKey='';
-  save('claudeKey','');
-  document.getElementById('claude-key-input').value='';
-  updateKeyUI();
-  showToast('Key cleared');
+  groqKey='';save('groqKey','');
+  document.getElementById('groq-key-input').value='';
+  updateKeyUI();showToast('Key cleared');
 }
 
+// ── Toast ─────────────────────────────────────────────
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2000);
 }
 
+// ── Tabs ──────────────────────────────────────────────
 function switchTab(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -356,6 +403,7 @@ function switchTab(name){
   if(name==='rank'&&(document.getElementById('r-bench').value||document.getElementById('r-squat').value))calcRank();
 }
 
+// ── Workout ───────────────────────────────────────────
 function addExercise(){
   const name=document.getElementById('ex-name').value.trim();
   const sets=parseInt(document.getElementById('ex-sets').value)||0;
@@ -365,12 +413,9 @@ function addExercise(){
   exercises.push({name,sets,reps,weight});
   save('exercises_'+todayKey,exercises);
   ['ex-name','ex-sets','ex-reps','ex-weight'].forEach(id=>document.getElementById(id).value='');
-  renderExercises();
-  showToast('Exercise added');
+  renderExercises();showToast('Exercise added');
 }
-
 function removeExercise(i){exercises.splice(i,1);save('exercises_'+todayKey,exercises);renderExercises();}
-
 function renderExercises(){
   document.getElementById('w-total').textContent=exercises.length;
   document.getElementById('w-sets').textContent=exercises.reduce((a,e)=>a+e.sets,0);
@@ -383,14 +428,12 @@ function renderExercises(){
     </div>`).join('');
 }
 
+// ── Calories ──────────────────────────────────────────
 function updateGoal(){
   calGoal=parseInt(document.getElementById('cal-goal-input').value)||2000;
   document.getElementById('cal-goal-lbl').textContent=calGoal;
-  save('calGoal',calGoal);
-  updateRing();
-  showToast('Goal updated');
+  save('calGoal',calGoal);updateRing();showToast('Goal updated');
 }
-
 function addFood(){
   const name=document.getElementById('food-name').value.trim();
   const kcal=parseInt(document.getElementById('food-kcal').value)||0;
@@ -401,17 +444,13 @@ function addFood(){
   foods.push({name,kcal,protein,carbs,fat});
   save('foods_'+todayKey,foods);
   ['food-name','food-kcal','food-protein','food-carbs','food-fat'].forEach(id=>document.getElementById(id).value='');
-  renderFoods();
-  showToast('Food logged');
+  renderFoods();showToast('Food logged');
 }
-
 function removeFood(i){foods.splice(i,1);save('foods_'+todayKey,foods);renderFoods();}
-
 function clearToday(){
   if(!confirm('Clear all food for today?'))return;
   foods=[];save('foods_'+todayKey,foods);renderFoods();
 }
-
 function renderFoods(){
   const totKcal=foods.reduce((a,f)=>a+f.kcal,0);
   document.getElementById('cal-consumed').textContent=totKcal;
@@ -428,7 +467,6 @@ function renderFoods(){
       <button class="dbtn" onclick="removeFood(${i})"><i class="ti ti-trash"></i></button>
     </div>`).join('')+'</div>';
 }
-
 function updateRing(c){
   const consumed=c!=null?c:parseInt(document.getElementById('cal-consumed').textContent)||0;
   const pct=Math.min(consumed/calGoal,1);
@@ -436,16 +474,24 @@ function updateRing(c){
   document.getElementById('cal-ring').setAttribute('stroke',consumed>calGoal?'#f09595':'#c8ff00');
 }
 
-async function callClaude(prompt){
-  if(!claudeKey){showToast('Add your API key first');return null;}
-  const r=await fetch('https://api.anthropic.com/v1/messages',{
+// ── Groq AI ───────────────────────────────────────────
+async function callGroq(prompt){
+  if(!groqKey){showToast('Add your Groq API key first');return null;}
+  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
     method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':claudeKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+groqKey},
+    body:JSON.stringify({
+      model:'llama-3.3-70b-versatile',
+      max_tokens:1000,
+      messages:[
+        {role:'system',content:'You are a knowledgeable fitness and nutrition expert. Give specific, practical, motivating advice. Plain text only, no markdown symbols or hashtags.'},
+        {role:'user',content:prompt}
+      ]
+    })
   });
   const data=await r.json();
   if(data.error)throw new Error(data.error.message);
-  return data.content.map(b=>b.text||'').join('');
+  return data.choices[0].message.content;
 }
 
 async function getWorkoutPlan(){
@@ -459,11 +505,11 @@ async function getWorkoutPlan(){
   save('awProfile',{age,weight,height,days,goal,level});
   const resp=document.getElementById('aw-response');
   resp.innerHTML='<p class="hint">Building your plan...</p>';
-  const prompt=`You are a certified personal trainer. Create a concise weekly workout plan for:
-Age: ${age||'not given'}, Weight: ${weight?weight+' lbs':'not given'}, Height: ${height?height+' in':'not given'}, Training days/week: ${days||'not given'}, Goal: ${goal}, Level: ${level}.
-Give a clear day-by-day breakdown with exercises, sets, and reps. Be specific and motivating. Plain text only, no markdown symbols.`;
+  const prompt=`Create a weekly workout plan for:
+Age: ${age||'not given'}, Weight: ${weight?weight+' lbs':'not given'}, Height: ${height?height+' in':'not given'}, Days/week: ${days||'not given'}, Goal: ${goal}, Level: ${level}.
+Give a day-by-day breakdown with exercises, sets, and reps. Be specific and motivating.`;
   try{
-    const text=await callClaude(prompt);
+    const text=await callGroq(prompt);
     if(!text)return;
     resp.innerHTML='<div class="ai-box">'+text+'</div>';
     save('awPlan',text);
@@ -482,17 +528,18 @@ async function getNutritionPlan(){
   save('anProfile',{age,weight,height,bmi,goal,activity,diet});
   const resp=document.getElementById('an-response');
   resp.innerHTML='<p class="hint">Calculating your plan...</p>';
-  const prompt=`You are a registered dietitian. Create a personalized daily nutrition plan for:
+  const prompt=`Create a personalized daily nutrition plan for:
 Age: ${age||'not given'}, Weight: ${weight?weight+' lbs':'not given'}, Height: ${height?height+' in':'not given'}, BMI: ${bmi||'not given'}, Goal: ${goal}, Activity: ${activity}, Diet: ${diet||'no restrictions'}.
-Include: daily calorie target, macro breakdown in grams, and a full sample day of meals with calorie counts. Be specific. Plain text only, no markdown symbols.`;
+Include daily calorie target, macro breakdown in grams, and a full sample day of meals with calorie counts. Be specific.`;
   try{
-    const text=await callClaude(prompt);
+    const text=await callGroq(prompt);
     if(!text)return;
     resp.innerHTML='<div class="ai-box">'+text+'</div>';
     save('anPlan',text);
   }catch(e){resp.innerHTML='<p style="color:#f09595;font-size:13px">Error: '+e.message+'</p>';}
 }
 
+// ── Rank ──────────────────────────────────────────────
 const tiers=[
   {name:'Untrained',min:0,max:0.75,color:'#777',bg:'#222'},
   {name:'Novice',min:0.75,max:1.25,color:'#85B7EB',bg:'#001a2e'},
@@ -502,7 +549,6 @@ const tiers=[
   {name:'Godlike',min:3.0,max:999,color:'#ff6b6b',bg:'#2e0000'},
 ];
 function getTier(r){return tiers.find(t=>r>=t.min&&r<t.max)||tiers[0];}
-
 function calcRank(){
   const bench=parseFloat(document.getElementById('r-bench').value)||0;
   const squat=parseFloat(document.getElementById('r-squat').value)||0;
@@ -532,6 +578,7 @@ function calcRank(){
   document.getElementById('total-lifted').textContent=(bench+squat+dead)+' lbs total';
 }
 
+// ── Init ──────────────────────────────────────────────
 renderExercises();
 renderFoods();
 if(savedRank.bench||savedRank.squat||savedRank.dead)calcRank();
@@ -540,9 +587,7 @@ if(savedAwPlan)document.getElementById('aw-response').innerHTML='<div class="ai-
 const savedAnPlan=load('anPlan',null);
 if(savedAnPlan)document.getElementById('an-response').innerHTML='<div class="ai-box">'+savedAnPlan+'</div>';
 
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
-}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
 </script>
 </body>
 </html>
