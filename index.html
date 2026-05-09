@@ -9,58 +9,60 @@
 <meta name="theme-color" content="#141414">
 <title>IronLog</title>
 <link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  html,body{height:100%;background:#0d0d0d;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-  .app{background:#141414;min-height:100vh;max-width:430px;margin:0 auto;color:#e8e8e8;display:flex;flex-direction:column}
-  .topbar{padding:54px 16px 10px;border-bottom:0.5px solid #2a2a2a;flex-shrink:0}
-  .topbar h1{font-size:22px;font-weight:600;color:#fff;letter-spacing:0.3px}
-  .topbar p{font-size:12px;color:#888;margin-top:2px}
-  .tabs{display:flex;border-bottom:0.5px solid #2a2a2a;background:#141414;flex-shrink:0}
-  .tab{flex:1;padding:10px 0 8px;font-size:10px;color:#555;text-align:center;cursor:pointer;border:none;background:transparent;transition:color 0.15s;font-family:inherit}
-  .tab i{display:block;font-size:20px;margin-bottom:3px}
-  .tab.active{color:#c8ff00}
-  .screens{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-  .screen{display:none;padding:16px 16px 90px}
-  .screen.active{display:block}
-  .slbl{font-size:10px;color:#666;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px;margin-top:4px}
-  .card{background:#1e1e1e;border-radius:16px;padding:14px;margin-bottom:12px;border:0.5px solid #2e2e2e}
-  .stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
-  .stat{background:#1e1e1e;border-radius:14px;padding:14px;border:0.5px solid #2e2e2e}
-  .stat-val{font-size:24px;font-weight:600;color:#fff}
-  .stat-lbl{font-size:11px;color:#666;margin-top:2px}
-  .di{background:#1e1e1e;border:0.5px solid #333;border-radius:12px;padding:12px 14px;color:#e8e8e8;font-size:15px;width:100%;font-family:inherit;outline:none;-webkit-appearance:none}
-  .di::placeholder{color:#444}
-  .di:focus{border-color:#666}
-  .ds{background:#1e1e1e;border:0.5px solid #333;border-radius:12px;padding:12px 14px;color:#e8e8e8;font-size:15px;width:100%;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none}
-  .ds option{background:#1e1e1e;color:#e8e8e8}
-  .irow{display:flex;gap:8px;margin-bottom:8px}
-  .bp{background:#c8ff00;color:#0a0a0a;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:600;width:100%;cursor:pointer;font-family:inherit;margin-bottom:12px}
-  .bp:active{opacity:0.85}
-  .bs{background:#1e1e1e;color:#e8e8e8;border:0.5px solid #333;border-radius:12px;padding:12px 16px;font-size:14px;cursor:pointer;font-family:inherit}
-  .ai-box{background:#1e1e1e;border-radius:14px;border:0.5px solid #2e2e2e;padding:14px;margin-bottom:10px;font-size:14px;line-height:1.75;color:#ccc;white-space:pre-wrap}
-  .hint{color:#555;font-size:13px;font-style:italic;padding:6px 0}
-  .macro-row{display:flex;gap:8px;margin-bottom:14px}
-  .macro{flex:1;background:#1e1e1e;border-radius:12px;padding:12px;text-align:center;border:0.5px solid #2e2e2e}
-  .macro-val{font-size:17px;font-weight:600;color:#e8e8e8}
-  .macro-lbl{font-size:10px;color:#666;margin-top:2px}
-  .fitem{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:0.5px solid #222}
-  .fitem:last-child{border-bottom:none}
-  .dbtn{background:none;border:none;color:#444;cursor:pointer;font-size:18px;padding:4px 6px;line-height:1}
-  .rank-bar-wrap{background:#1a1a1a;border-radius:6px;height:8px;margin:6px 0 4px;overflow:hidden}
-  .rank-bar{height:8px;border-radius:6px;background:#c8ff00;transition:width 0.4s}
-  .rbadge{display:inline-block;font-size:12px;font-weight:500;padding:3px 12px;border-radius:20px;margin-top:2px}
-  .divider{height:0.5px;background:#2a2a2a;margin:14px 0}
-  .lrow{display:flex;flex-direction:column;margin-bottom:14px}
-  .lbl-row{font-size:12px;color:#888;margin-bottom:2px;display:flex;justify-content:space-between}
-  .ex-card{background:#1e1e1e;border-radius:14px;padding:12px 14px;margin-bottom:8px;border:0.5px solid #2e2e2e;display:flex;justify-content:space-between;align-items:center}
-  .ex-name{font-size:14px;font-weight:500;color:#e8e8e8}
-  .ex-sub{font-size:12px;color:#666;margin-top:3px}
-  .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#c8ff00;color:#0a0a0a;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999}
-  .toast.show{opacity:1}
-  .cal-ring-wrap{display:flex;justify-content:center;padding:10px 0 8px}
-  input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#0d0d0d;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.app{background:#141414;min-height:100vh;max-width:430px;margin:0 auto;color:#e8e8e8;display:flex;flex-direction:column}
+.topbar{padding:54px 16px 10px;border-bottom:0.5px solid #2a2a2a;flex-shrink:0}
+.topbar h1{font-size:22px;font-weight:600;color:#fff;letter-spacing:0.3px}
+.topbar p{font-size:12px;color:#888;margin-top:2px}
+.tabs{display:flex;border-bottom:0.5px solid #2a2a2a;background:#141414;flex-shrink:0}
+.tab{flex:1;padding:10px 0 8px;font-size:10px;color:#555;text-align:center;cursor:pointer;border:none;background:transparent;transition:color 0.15s;font-family:inherit}
+.tab i{display:block;font-size:20px;margin-bottom:3px}
+.tab.active{color:#c8ff00}
+.screens{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.screen{display:none;padding:16px 16px 90px}
+.screen.active{display:block}
+.slbl{font-size:10px;color:#666;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px;margin-top:4px}
+.card{background:#1e1e1e;border-radius:16px;padding:14px;margin-bottom:12px;border:0.5px solid #2e2e2e}
+.stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.stat{background:#1e1e1e;border-radius:14px;padding:14px;border:0.5px solid #2e2e2e}
+.stat-val{font-size:24px;font-weight:600;color:#fff}
+.stat-lbl{font-size:11px;color:#666;margin-top:2px}
+.di{background:#1e1e1e;border:0.5px solid #333;border-radius:12px;padding:12px 14px;color:#e8e8e8;font-size:15px;width:100%;font-family:inherit;outline:none;-webkit-appearance:none}
+.di::placeholder{color:#444}
+.di:focus{border-color:#666}
+.ds{background:#1e1e1e;border:0.5px solid #333;border-radius:12px;padding:12px 14px;color:#e8e8e8;font-size:15px;width:100%;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none}
+.ds option{background:#1e1e1e;color:#e8e8e8}
+.irow{display:flex;gap:8px;margin-bottom:8px}
+.bp{background:#c8ff00;color:#0a0a0a;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:600;width:100%;cursor:pointer;font-family:inherit;margin-bottom:12px}
+.bp:active{opacity:0.85}
+.bs{background:#1e1e1e;color:#e8e8e8;border:0.5px solid #333;border-radius:12px;padding:12px 16px;font-size:14px;cursor:pointer;font-family:inherit}
+.ai-box{background:#1e1e1e;border-radius:14px;border:0.5px solid #2e2e2e;padding:14px;margin-bottom:10px;font-size:14px;line-height:1.75;color:#ccc;white-space:pre-wrap}
+.hint{color:#555;font-size:13px;font-style:italic;padding:6px 0}
+.macro-row{display:flex;gap:8px;margin-bottom:14px}
+.macro{flex:1;background:#1e1e1e;border-radius:12px;padding:12px;text-align:center;border:0.5px solid #2e2e2e}
+.macro-val{font-size:17px;font-weight:600;color:#e8e8e8}
+.macro-lbl{font-size:10px;color:#666;margin-top:2px}
+.fitem{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:0.5px solid #222}
+.fitem:last-child{border-bottom:none}
+.dbtn{background:none;border:none;color:#444;cursor:pointer;font-size:18px;padding:4px 6px;line-height:1}
+.rank-bar-wrap{background:#1a1a1a;border-radius:6px;height:8px;margin:6px 0 4px;overflow:hidden}
+.rank-bar{height:8px;border-radius:6px;background:#c8ff00;transition:width 0.4s}
+.rbadge{display:inline-block;font-size:12px;font-weight:500;padding:3px 12px;border-radius:20px;margin-top:2px}
+.divider{height:0.5px;background:#2a2a2a;margin:14px 0}
+.lrow{display:flex;flex-direction:column;margin-bottom:14px}
+.lbl-row{font-size:12px;color:#888;margin-bottom:2px;display:flex;justify-content:space-between}
+.ex-card{background:#1e1e1e;border-radius:14px;padding:12px 14px;margin-bottom:8px;border:0.5px solid #2e2e2e;display:flex;justify-content:space-between;align-items:center}
+.ex-name{font-size:14px;font-weight:500;color:#e8e8e8}
+.ex-sub{font-size:12px;color:#666;margin-top:3px}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#c8ff00;color:#0a0a0a;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1}
+.cal-ring-wrap{display:flex;justify-content:center;padding:10px 0 8px}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+.key-banner{background:#1a2e00;border:0.5px solid #2a4400;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#aaa;display:flex;align-items:center;gap:10px}
+.key-banner i{color:#c8ff00;font-size:18px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -70,11 +72,11 @@
     <p id="topdate"></p>
   </div>
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('workout')" id="t-workout"><i class="ti ti-barbell" aria-hidden="true"></i>Workout</button>
-    <button class="tab" onclick="switchTab('calories')" id="t-calories"><i class="ti ti-apple" aria-hidden="true"></i>Calories</button>
-    <button class="tab" onclick="switchTab('aiworkout')" id="t-aiworkout"><i class="ti ti-robot" aria-hidden="true"></i>AI Coach</button>
-    <button class="tab" onclick="switchTab('aifood')" id="t-aifood"><i class="ti ti-salad" aria-hidden="true"></i>Nutrition</button>
-    <button class="tab" onclick="switchTab('rank')" id="t-rank"><i class="ti ti-trophy" aria-hidden="true"></i>Rank</button>
+    <button class="tab active" onclick="switchTab('workout')" id="t-workout"><i class="ti ti-barbell"></i>Workout</button>
+    <button class="tab" onclick="switchTab('calories')" id="t-calories"><i class="ti ti-apple"></i>Calories</button>
+    <button class="tab" onclick="switchTab('aiworkout')" id="t-aiworkout"><i class="ti ti-robot"></i>AI Coach</button>
+    <button class="tab" onclick="switchTab('aifood')" id="t-aifood"><i class="ti ti-salad"></i>Nutrition</button>
+    <button class="tab" onclick="switchTab('rank')" id="t-rank"><i class="ti ti-trophy"></i>Rank</button>
   </div>
   <div class="screens">
 
@@ -136,6 +138,15 @@
 
     <!-- AI WORKOUT COACH -->
     <div class="screen" id="s-aiworkout">
+      <div class="key-banner" id="aw-key-banner">
+        <i class="ti ti-key"></i>
+        <div style="flex:1">
+          <div style="color:#c8ff00;font-weight:600;margin-bottom:4px">Gemini API key required</div>
+          <input class="di" id="gemini-key" placeholder="Paste your free Gemini API key here" style="font-size:13px;padding:8px 10px">
+          <button class="bp" style="margin-top:8px;margin-bottom:0;padding:10px;font-size:13px" onclick="saveKey()">Save key</button>
+          <p style="font-size:11px;color:#666;margin-top:8px">Get a free key at aistudio.google.com — no credit card needed</p>
+        </div>
+      </div>
       <div class="card">
         <div class="slbl" style="margin-bottom:12px">Your profile</div>
         <div class="irow"><input class="di" id="aw-age" placeholder="Age" type="number"><input class="di" id="aw-weight" placeholder="Weight (lbs)" type="number"></div>
@@ -256,34 +267,33 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Date ──────────────────────────────────────────────
 const dnames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const mnames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const now=new Date();
 const todayKey=now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
 document.getElementById('topdate').textContent=dnames[now.getDay()]+', '+mnames[now.getMonth()]+' '+now.getDate();
 
-// ── Storage helpers ───────────────────────────────────
 function save(key,val){try{localStorage.setItem('ironlog_'+key,JSON.stringify(val));}catch(e){}}
 function load(key,def){try{const v=localStorage.getItem('ironlog_'+key);return v!=null?JSON.parse(v):def;}catch(e){return def;}}
 
-// ── State ─────────────────────────────────────────────
 let exercises=load('exercises_'+todayKey,[]);
 let foods=load('foods_'+todayKey,[]);
 let calGoal=load('calGoal',2000);
+let geminiKey=load('geminiKey','');
 
-// restore calorie goal input
 document.getElementById('cal-goal-input').value=calGoal;
 document.getElementById('cal-goal-lbl').textContent=calGoal;
 
-// restore rank inputs
+if(geminiKey){
+  document.getElementById('aw-key-banner').style.display='none';
+}
+
 const savedRank=load('rank',{});
 if(savedRank.bench)document.getElementById('r-bench').value=savedRank.bench;
 if(savedRank.squat)document.getElementById('r-squat').value=savedRank.squat;
 if(savedRank.dead)document.getElementById('r-dead').value=savedRank.dead;
 if(savedRank.bw)document.getElementById('r-bw').value=savedRank.bw;
 
-// restore AI coach inputs
 const savedAW=load('awProfile',{});
 if(savedAW.age)document.getElementById('aw-age').value=savedAW.age;
 if(savedAW.weight)document.getElementById('aw-weight').value=savedAW.weight;
@@ -301,14 +311,12 @@ if(savedAN.goal)document.getElementById('an-goal').value=savedAN.goal;
 if(savedAN.activity)document.getElementById('an-activity').value=savedAN.activity;
 if(savedAN.diet)document.getElementById('an-diet').value=savedAN.diet;
 
-// ── Toast ─────────────────────────────────────────────
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2000);
 }
 
-// ── Tabs ──────────────────────────────────────────────
 function switchTab(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -317,7 +325,15 @@ function switchTab(name){
   if(name==='rank'&&(document.getElementById('r-bench').value||document.getElementById('r-squat').value))calcRank();
 }
 
-// ── Workout ───────────────────────────────────────────
+function saveKey(){
+  const k=document.getElementById('gemini-key').value.trim();
+  if(!k){showToast('Paste your API key first');return;}
+  geminiKey=k;
+  save('geminiKey',k);
+  document.getElementById('aw-key-banner').style.display='none';
+  showToast('API key saved!');
+}
+
 function addExercise(){
   const name=document.getElementById('ex-name').value.trim();
   const sets=parseInt(document.getElementById('ex-sets').value)||0;
@@ -331,11 +347,7 @@ function addExercise(){
   showToast('Exercise added');
 }
 
-function removeExercise(i){
-  exercises.splice(i,1);
-  save('exercises_'+todayKey,exercises);
-  renderExercises();
-}
+function removeExercise(i){exercises.splice(i,1);save('exercises_'+todayKey,exercises);renderExercises();}
 
 function renderExercises(){
   document.getElementById('w-total').textContent=exercises.length;
@@ -345,11 +357,10 @@ function renderExercises(){
   el.innerHTML=exercises.map((e,i)=>`
     <div class="ex-card">
       <div><div class="ex-name">${e.name}</div><div class="ex-sub">${e.sets} sets × ${e.reps} reps${e.weight?' · '+e.weight+' lbs':''}</div></div>
-      <button class="dbtn" onclick="removeExercise(${i})" aria-label="Remove"><i class="ti ti-trash"></i></button>
+      <button class="dbtn" onclick="removeExercise(${i})"><i class="ti ti-trash"></i></button>
     </div>`).join('');
 }
 
-// ── Calories ──────────────────────────────────────────
 function updateGoal(){
   calGoal=parseInt(document.getElementById('cal-goal-input').value)||2000;
   document.getElementById('cal-goal-lbl').textContent=calGoal;
@@ -372,17 +383,11 @@ function addFood(){
   showToast('Food logged');
 }
 
-function removeFood(i){
-  foods.splice(i,1);
-  save('foods_'+todayKey,foods);
-  renderFoods();
-}
+function removeFood(i){foods.splice(i,1);save('foods_'+todayKey,foods);renderFoods();}
 
 function clearToday(){
   if(!confirm('Clear all food for today?'))return;
-  foods=[];
-  save('foods_'+todayKey,foods);
-  renderFoods();
+  foods=[];save('foods_'+todayKey,foods);renderFoods();
 }
 
 function renderFoods(){
@@ -398,7 +403,7 @@ function renderFoods(){
     <div class="fitem">
       <div><div style="font-size:14px;font-weight:500;color:#e8e8e8">${f.name}</div>
       <div style="font-size:11px;color:#666">${f.kcal} kcal · P:${f.protein}g C:${f.carbs}g F:${f.fat}g</div></div>
-      <button class="dbtn" onclick="removeFood(${i})" aria-label="Remove"><i class="ti ti-trash"></i></button>
+      <button class="dbtn" onclick="removeFood(${i})"><i class="ti ti-trash"></i></button>
     </div>`).join('')+'</div>';
 }
 
@@ -409,7 +414,15 @@ function updateRing(c){
   document.getElementById('cal-ring').setAttribute('stroke',consumed>calGoal?'#f09595':'#c8ff00');
 }
 
-// ── AI Workout Coach ──────────────────────────────────
+async function callGemini(prompt){
+  if(!geminiKey){showToast('Add your Gemini API key first');return null;}
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`;
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+  const data=await r.json();
+  if(data.error){throw new Error(data.error.message);}
+  return data.candidates[0].content.parts[0].text;
+}
+
 async function getWorkoutPlan(){
   const age=document.getElementById('aw-age').value;
   const weight=document.getElementById('aw-weight').value;
@@ -425,15 +438,13 @@ async function getWorkoutPlan(){
 Age: ${age||'not given'}, Weight: ${weight?weight+' lbs':'not given'}, Height: ${height?height+' in':'not given'}, Training days/week: ${days||'not given'}, Goal: ${goal}, Level: ${level}.
 Give a clear day-by-day breakdown with exercises, sets, and reps. Be specific and motivating. Plain text only, no markdown # symbols.`;
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
-    const data=await r.json();
-    const text=data.content.map(b=>b.text||'').join('');
+    const text=await callGemini(prompt);
+    if(!text)return;
     resp.innerHTML='<div class="ai-box">'+text+'</div>';
     save('awPlan',text);
-  }catch(e){resp.innerHTML='<p style="color:#f09595;font-size:13px">Error reaching AI. Check your connection.</p>';}
+  }catch(e){resp.innerHTML='<p style="color:#f09595;font-size:13px">Error: '+e.message+'</p>';}
 }
 
-// ── AI Nutrition ──────────────────────────────────────
 async function getNutritionPlan(){
   const age=document.getElementById('an-age').value;
   const weight=document.getElementById('an-weight').value;
@@ -448,17 +459,15 @@ async function getNutritionPlan(){
   resp.innerHTML='<p class="hint">Calculating your plan...</p>';
   const prompt=`You are a registered dietitian. Create a personalized daily nutrition plan for:
 Age: ${age||'not given'}, Weight: ${weight?weight+' lbs':'not given'}, Height: ${height?height+' in':'not given'}, BMI: ${bmi||'not given'}, Goal: ${goal}, Activity: ${activity}, Diet: ${diet||'no restrictions'}.
-Include: daily calorie target, macro breakdown (protein/carbs/fat in grams), and a full sample day of meals with calorie counts. Be specific and practical. Plain text only, no markdown # symbols.`;
+Include: daily calorie target, macro breakdown in grams, and a full sample day of meals with calorie counts. Be specific. Plain text only, no markdown # symbols.`;
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
-    const data=await r.json();
-    const text=data.content.map(b=>b.text||'').join('');
+    const text=await callGemini(prompt);
+    if(!text)return;
     resp.innerHTML='<div class="ai-box">'+text+'</div>';
     save('anPlan',text);
-  }catch(e){resp.innerHTML='<p style="color:#f09595;font-size:13px">Error reaching AI. Check your connection.</p>';}
+  }catch(e){resp.innerHTML='<p style="color:#f09595;font-size:13px">Error: '+e.message+'</p>';}
 }
 
-// ── Rank ──────────────────────────────────────────────
 const tiers=[
   {name:'Untrained',min:0,max:0.75,color:'#777',bg:'#222'},
   {name:'Novice',min:0.75,max:1.25,color:'#85B7EB',bg:'#001a2e'},
@@ -498,18 +507,14 @@ function calcRank(){
   document.getElementById('total-lifted').textContent=(bench+squat+dead)+' lbs total';
 }
 
-// ── Init renders ──────────────────────────────────────
 renderExercises();
 renderFoods();
 if(savedRank.bench||savedRank.squat||savedRank.dead)calcRank();
-
-// restore saved AI plans
 const savedAwPlan=load('awPlan',null);
 if(savedAwPlan)document.getElementById('aw-response').innerHTML='<div class="ai-box">'+savedAwPlan+'</div>';
 const savedAnPlan=load('anPlan',null);
 if(savedAnPlan)document.getElementById('an-response').innerHTML='<div class="ai-box">'+savedAnPlan+'</div>';
 
-// ── Service Worker ────────────────────────────────────
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
