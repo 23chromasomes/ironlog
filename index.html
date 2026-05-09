@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="IronLog">
+<meta name="theme-color" content="#141414">
+<title>IronLog</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;background:#0d0d0d;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+  .app{background:#141414;min-height:100vh;max-width:430px;margin:0 auto;color:#e8e8e8;display:flex;flex-direction:column}
+  .topbar{padding:54px 16px 10px;border-bottom:0.5px solid #2a2a2a;flex-shrink:0}
+  .topbar h1{font-size:22px;font-weight:600;color:#fff;letter-spacing:0.3px}
+  .topbar p{font-size:12px;color:#888;margin-top:2px}
+  .tabs{display:flex;border-bottom:0.5px solid #2a2a2a;background:#141414;flex-shrink:0}
+  .tab{flex:1;padding:10px 0 8px;font-size:10px;color:#555;text-align:center;cursor:pointer;border:none;background:transparent;transition:color 0.15s;font-family:inherit}
+  .tab i{display:block;font-size:20px;margin-bottom:3px}
+  .tab.active{color:#c8ff00}
+  .screens{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .screen{display:none;padding:16px 16px 90px}
+  .screen.active{display:block}
+  .slbl{font-size:10px;color:#666;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px;margin-top:4px}
+  .card{background:#1e1e1e;border-radius:16px;padding:14px;margin-bottom:12px;border:0.5px solid #2e2e2e}
+  .stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
+  .stat{background:#1e1e1e;border-radius:14px;padding:14px;border:0.5px solid #2e2e2e}
+  .stat-val{font-size:24px;font-weight:600;color:#fff}
+  .stat-lbl{font-size:11px;color:#666;margin-top:2px}
+  .di{background:#1e1e1e;border:0.5px solid #333;border-radius:12px;padding:12px 14px;color:#e8e8e8;font-size:15px;width:100%;font-family:inherit;outline:none;-webkit-appearance:none}
+  .di::placeholder{color:#444}
+  .di:focus{border-color:#666}
+  .ds{background:#1e1e1e;border:0.5px solid #333;border-radius:12px;padding:12px 14px;color:#e8e8e8;font-size:15px;width:100%;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none}
+  .ds option{background:#1e1e1e;color:#e8e8e8}
+  .irow{display:flex;gap:8px;margin-bottom:8px}
+  .bp{background:#c8ff00;color:#0a0a0a;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:600;width:100%;cursor:pointer;font-family:inherit;margin-bottom:12px}
+  .bp:active{opacity:0.85}
+  .bs{background:#1e1e1e;color:#e8e8e8;border:0.5px solid #333;border-radius:12px;padding:12px 16px;font-size:14px;cursor:pointer;font-family:inherit}
+  .ai-box{background:#1e1e1e;border-radius:14px;border:0.5px solid #2e2e2e;padding:14px;margin-bottom:10px;font-size:14px;line-height:1.75;color:#ccc;white-space:pre-wrap}
+  .hint{color:#555;font-size:13px;font-style:italic;padding:6px 0}
+  .macro-row{display:flex;gap:8px;margin-bottom:14px}
+  .macro{flex:1;background:#1e1e1e;border-radius:12px;padding:12px;text-align:center;border:0.5px solid #2e2e2e}
+  .macro-val{font-size:17px;font-weight:600;color:#e8e8e8}
+  .macro-lbl{font-size:10px;color:#666;margin-top:2px}
+  .fitem{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:0.5px solid #222}
+  .fitem:last-child{border-bottom:none}
+  .dbtn{background:none;border:none;color:#444;cursor:pointer;font-size:18px;padding:4px 6px;line-height:1}
+  .rank-bar-wrap{background:#1a1a1a;border-radius:6px;height:8px;margin:6px 0 4px;overflow:hidden}
+  .rank-bar{height:8px;border-radius:6px;background:#c8ff00;transition:width 0.4s}
+  .rbadge{display:inline-block;font-size:12px;font-weight:500;padding:3px 12px;border-radius:20px;margin-top:2px}
+  .divider{height:0.5px;background:#2a2a2a;margin:14px 0}
+  .lrow{display:flex;flex-direction:column;margin-bottom:14px}
+  .lbl-row{font-size:12px;color:#888;margin-bottom:2px;display:flex;justify-content:space-between}
+  .ex-card{background:#1e1e1e;border-radius:14px;padding:12px 14px;margin-bottom:8px;border:0.5px solid #2e2e2e;display:flex;justify-content:space-between;align-items:center}
+  .ex-name{font-size:14px;font-weight:500;color:#e8e8e8}
+  .ex-sub{font-size:12px;color:#666;margin-top:3px}
+  .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#c8ff00;color:#0a0a0a;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999}
+  .toast.show{opacity:1}
+  .cal-ring-wrap{display:flex;justify-content:center;padding:10px 0 8px}
+  input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <h1>IronLog</h1>
+    <p id="topdate"></p>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('workout')" id="t-workout"><i class="ti ti-barbell" aria-hidden="true"></i>Workout</button>
+    <button class="tab" onclick="switchTab('calories')" id="t-calories"><i class="ti ti-apple" aria-hidden="true"></i>Calories</button>
+    <button class="tab" onclick="switchTab('aiworkout')" id="t-aiworkout"><i class="ti ti-robot" aria-hidden="true"></i>AI Coach</button>
+    <button class="tab" onclick="switchTab('aifood')" id="t-aifood"><i class="ti ti-salad" aria-hidden="true"></i>Nutrition</button>
+    <button class="tab" onclick="switchTab('rank')" id="t-rank"><i class="ti ti-trophy" aria-hidden="true"></i>Rank</button>
+  </div>
+  <div class="screens">
+
+    <!-- WORKOUT -->
+    <div class="screen active" id="s-workout">
+      <div class="stat-grid">
+        <div class="stat"><div class="stat-val" id="w-total">0</div><div class="stat-lbl">Exercises today</div></div>
+        <div class="stat"><div class="stat-val" id="w-sets">0</div><div class="stat-lbl">Total sets</div></div>
+      </div>
+      <div class="slbl">Log exercise</div>
+      <input class="di" id="ex-name" placeholder="Exercise name (e.g. Bench press)" style="margin-bottom:8px">
+      <div class="irow">
+        <input class="di" id="ex-sets" placeholder="Sets" type="number" min="1">
+        <input class="di" id="ex-reps" placeholder="Reps" type="number" min="1">
+        <input class="di" id="ex-weight" placeholder="lbs" type="number" min="0">
+      </div>
+      <button class="bp" onclick="addExercise()">+ Add exercise</button>
+      <div class="slbl">Today's log</div>
+      <div id="exercise-list"><p class="hint">No exercises logged yet.</p></div>
+    </div>
+
+    <!-- CALORIES -->
+    <div class="screen" id="s-calories">
+      <div class="cal-ring-wrap">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="58" fill="none" stroke="#222" stroke-width="13"/>
+          <circle cx="70" cy="70" r="58" fill="none" stroke="#c8ff00" stroke-width="13"
+            stroke-dasharray="364.4" id="cal-ring" stroke-dashoffset="364.4"
+            stroke-linecap="round" transform="rotate(-90 70 70)"/>
+          <text x="70" y="64" text-anchor="middle" fill="#ffffff" font-size="24" font-weight="600" font-family="-apple-system,sans-serif" id="cal-consumed">0</text>
+          <text x="70" y="83" text-anchor="middle" fill="#888" font-size="12" font-family="-apple-system,sans-serif">/ <tspan id="cal-goal-lbl">2000</tspan> kcal</text>
+        </svg>
+      </div>
+      <div class="macro-row">
+        <div class="macro"><div class="macro-val" id="m-protein">0g</div><div class="macro-lbl">Protein</div></div>
+        <div class="macro"><div class="macro-val" id="m-carbs">0g</div><div class="macro-lbl">Carbs</div></div>
+        <div class="macro"><div class="macro-val" id="m-fat">0g</div><div class="macro-lbl">Fat</div></div>
+      </div>
+      <div class="slbl">Log food</div>
+      <input class="di" id="food-name" placeholder="Food name (e.g. Chicken breast)" style="margin-bottom:8px">
+      <div class="irow">
+        <input class="di" id="food-kcal" placeholder="kcal" type="number" min="0">
+        <input class="di" id="food-protein" placeholder="protein g" type="number" min="0">
+        <input class="di" id="food-carbs" placeholder="carbs g" type="number" min="0">
+        <input class="di" id="food-fat" placeholder="fat g" type="number" min="0">
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+        <span style="font-size:12px;color:#888;white-space:nowrap">Daily goal:</span>
+        <input class="di" id="cal-goal-input" type="number" value="2000" style="width:100px">
+        <button class="bs" onclick="updateGoal()">Set</button>
+      </div>
+      <button class="bp" onclick="addFood()">+ Log food</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="slbl" style="margin-bottom:0">Today's food</div>
+        <button class="bs" style="font-size:12px;padding:6px 12px;color:#888" onclick="clearToday()">Clear today</button>
+      </div>
+      <div id="food-list"><p class="hint">No food logged yet.</p></div>
+    </div>
+
+    <!-- AI WORKOUT COACH -->
+    <div class="screen" id="s-aiworkout">
+      <div class="card">
+        <div class="slbl" style="margin-bottom:12px">Your profile</div>
+        <div class="irow"><input class="di" id="aw-age" placeholder="Age" type="number"><input class="di" id="aw-weight" placeholder="Weight (lbs)" type="number"></div>
+        <div class="irow"><input class="di" id="aw-height" placeholder="Height (in)" type="number"><input class="di" id="aw-days" placeholder="Days/week" type="number" max="7"></div>
+        <select class="ds" id="aw-goal" style="margin-bottom:8px">
+          <option value="">-- Select goal --</option>
+          <option>Build muscle</option>
+          <option>Lose fat</option>
+          <option>Increase strength</option>
+          <option>Improve endurance</option>
+          <option>General fitness</option>
+        </select>
+        <select class="ds" id="aw-level" style="margin-bottom:14px">
+          <option value="">-- Experience level --</option>
+          <option>Beginner (under 1 year)</option>
+          <option>Intermediate (1-3 years)</option>
+          <option>Advanced (3+ years)</option>
+        </select>
+        <button class="bp" style="margin-bottom:0" onclick="getWorkoutPlan()">Get my workout plan</button>
+      </div>
+      <div class="slbl">AI recommendation</div>
+      <div id="aw-response"><p class="hint">Fill in your profile above to get a personalized plan.</p></div>
+    </div>
+
+    <!-- AI NUTRITION -->
+    <div class="screen" id="s-aifood">
+      <div class="card">
+        <div class="slbl" style="margin-bottom:12px">Your details</div>
+        <div class="irow"><input class="di" id="an-age" placeholder="Age" type="number"><input class="di" id="an-weight" placeholder="Weight (lbs)" type="number"></div>
+        <div class="irow"><input class="di" id="an-height" placeholder="Height (in)" type="number"><input class="di" id="an-bmi" placeholder="BMI (optional)" type="number" step="0.1"></div>
+        <select class="ds" id="an-goal" style="margin-bottom:8px">
+          <option value="">-- Nutrition goal --</option>
+          <option>Lose fat (deficit)</option>
+          <option>Build muscle (surplus)</option>
+          <option>Maintain weight</option>
+          <option>Improve performance</option>
+          <option>Improve gut health</option>
+        </select>
+        <select class="ds" id="an-activity" style="margin-bottom:8px">
+          <option value="">-- Activity level --</option>
+          <option>Sedentary (desk job, little exercise)</option>
+          <option>Lightly active (1-3 days/week)</option>
+          <option>Moderately active (3-5 days/week)</option>
+          <option>Very active (6-7 days/week)</option>
+          <option>Athlete (2x daily training)</option>
+        </select>
+        <select class="ds" id="an-diet" style="margin-bottom:14px">
+          <option value="">-- Dietary preference --</option>
+          <option>No restrictions</option>
+          <option>Vegetarian</option>
+          <option>Vegan</option>
+          <option>Keto / low carb</option>
+          <option>Gluten free</option>
+          <option>Dairy free</option>
+        </select>
+        <button class="bp" style="margin-bottom:0" onclick="getNutritionPlan()">Get my nutrition plan</button>
+      </div>
+      <div class="slbl">AI recommendation</div>
+      <div id="an-response"><p class="hint">Fill in your details above for a personalized meal plan.</p></div>
+    </div>
+
+    <!-- RANK -->
+    <div class="screen" id="s-rank">
+      <div class="card">
+        <div class="slbl" style="margin-bottom:12px">Enter your big 3 (lbs)</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:13px;color:#888;width:76px;flex-shrink:0">Bench</span>
+            <input class="di" id="r-bench" placeholder="e.g. 225" type="number" min="0" oninput="calcRank()">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:13px;color:#888;width:76px;flex-shrink:0">Squat</span>
+            <input class="di" id="r-squat" placeholder="e.g. 315" type="number" min="0" oninput="calcRank()">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:13px;color:#888;width:76px;flex-shrink:0">Deadlift</span>
+            <input class="di" id="r-dead" placeholder="e.g. 405" type="number" min="0" oninput="calcRank()">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:13px;color:#888;width:76px;flex-shrink:0">Bodyweight</span>
+            <input class="di" id="r-bw" placeholder="lbs" type="number" min="0" oninput="calcRank()">
+          </div>
+        </div>
+      </div>
+      <div id="rank-result" style="display:none">
+        <div class="slbl">Your ranking</div>
+        <div class="card">
+          <div style="text-align:center;margin-bottom:18px">
+            <div id="rank-title" style="font-size:30px;font-weight:700;color:#c8ff00"></div>
+            <div id="rank-subtitle" style="font-size:12px;color:#666;margin-top:5px"></div>
+          </div>
+          <div class="lrow">
+            <div class="lbl-row"><span>Bench</span><span id="bench-ratio"></span></div>
+            <div class="rank-bar-wrap"><div class="rank-bar" id="bench-bar"></div></div>
+            <span id="bench-rank-lbl" class="rbadge"></span>
+          </div>
+          <div class="lrow">
+            <div class="lbl-row"><span>Squat</span><span id="squat-ratio"></span></div>
+            <div class="rank-bar-wrap"><div class="rank-bar" id="squat-bar"></div></div>
+            <span id="squat-rank-lbl" class="rbadge"></span>
+          </div>
+          <div class="lrow">
+            <div class="lbl-row"><span>Deadlift</span><span id="dead-ratio"></span></div>
+            <div class="rank-bar-wrap"><div class="rank-bar" id="dead-bar"></div></div>
+            <span id="dead-rank-lbl" class="rbadge"></span>
+          </div>
+          <div class="divider"></div>
+          <div style="text-align:center">
+            <div style="font-size:11px;color:#666;margin-bottom:5px">Total lifted</div>
+            <div id="total-lifted" style="font-size:22px;font-weight:600;color:#fff"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Date ──────────────────────────────────────────────
+const dnames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const mnames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const now=new Date();
+const todayKey=now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
+document.getElementById('topdate').textContent=dnames[now.getDay()]+', '+mnames[now.getMonth()]+' '+now.getDate();
+
+// ── Storage helpers ───────────────────────────────────
+function save(key,val){try{localStorage.setItem('ironlog_'+key,JSON.stringify(val));}catch(e){}}
+function load(key,def){try{const v=localStorage.getItem('ironlog_'+key);return v!=null?JSON.parse(v):def;}catch(e){return def;}}
+
+// ── State ─────────────────────────────────────────────
+let exercises=load('exercises_'+todayKey,[]);
+let foods=load('foods_'+todayKey,[]);
+let calGoal=load('calGoal',2000);
+
+// restore calorie goal input
+document.getElementById('cal-goal-input').value=calGoal;
+document.getElementById('cal-goal-lbl').textContent=calGoal;
+
+// restore rank inputs
+const savedRank=load('rank',{});
+if(savedRank.bench)document.getElementById('r-bench').value=savedRank.bench;
+if(savedRank.squat)document.getElementById('r-squat').value=savedRank.squat;
+if(savedRank.dead)document.getElementById('r-dead').value=savedRank.dead;
+if(savedRank.bw)document.getElementById('r-bw').value=savedRank.bw;
+
+// restore AI coach inputs
+const savedAW=load('awProfile',{});
+if(savedAW.age)document.getElementById('aw-age').value=savedAW.age;
+if(savedAW.weight)document.getElementById('aw-weight').value=savedAW.weight;
+if(savedAW.height)document.getElementById('aw-height').value=savedAW.height;
+if(savedAW.days)document.getElementById('aw-days').value=savedAW.days;
+if(savedAW.goal)document.getElementById('aw-goal').value=savedAW.goal;
+if(savedAW.level)document.getElementById('aw-level').value=savedAW.level;
+
+const savedAN=load('anProfile',{});
+if(savedAN.age)document.getElementById('an-age').value=savedAN.age;
+if(savedAN.weight)document.getElementById('an-weight').value=savedAN.weight;
+if(savedAN.height)document.getElementById('an-height').value=savedAN.height;
+if(savedAN.bmi)document.getElementById('an-bmi').value=savedAN.bmi;
+if(savedAN.goal)document.getElementById('an-goal').value=savedAN.goal;
+if(savedAN.activity)document.getElementById('an-activity').value=savedAN.activity;
+if(savedAN.diet)document.getElementById('an-diet').value=savedAN.diet;
+
+// ── Toast ─────────────────────────────────────────────
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+// ── Tabs ──────────────────────────────────────────────
+function switchTab(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('s-'+name).classList.add('active');
+  document.getElementById('t-'+name).classList.add('active');
+  if(name==='rank'&&(document.getElementById('r-bench').value||document.getElementById('r-squat').value))calcRank();
+}
+
+// ── Workout ───────────────────────────────────────────
+function addExercise(){
+  const name=document.getElementById('ex-name').value.trim();
+  const sets=parseInt(document.getElementById('ex-sets').value)||0;
+  const reps=parseInt(document.getElementById('ex-reps').value)||0;
+  const weight=parseFloat(document.getElementById('ex-weight').value)||0;
+  if(!name)return;
+  exercises.push({name,sets,reps,weight});
+  save('exercises_'+todayKey,exercises);
+  ['ex-name','ex-sets','ex-reps','ex-weight'].forEach(id=>document.getElementById(id).value='');
+  renderExercises();
+  showToast('Exercise added');
+}
+
+function removeExercise(i){
+  exercises.splice(i,1);
+  save('exercises_'+todayKey,exercises);
+  renderExercises();
+}
+
+function renderExercises(){
+  document.getElementById('w-total').textContent=exercises.length;
+  document.getElementById('w-sets').textContent=exercises.reduce((a,e)=>a+e.sets,0);
+  const el=document.getElementById('exercise-list');
+  if(!exercises.length){el.innerHTML='<p class="hint">No exercises logged yet.</p>';return;}
+  el.innerHTML=exercises.map((e,i)=>`
+    <div class="ex-card">
+      <div><div class="ex-name">${e.name}</div><div class="ex-sub">${e.sets} sets × ${e.reps} reps${e.weight?' · '+e.weight+' lbs':''}</div></div>
+      <button class="dbtn" onclick="removeExercise(${i})" aria-label="Remove"><i class="ti ti-trash"></i></button>
+    </div>`).join('');
+}
+
+// ── Calories ──────────────────────────────────────────
+function updateGoal(){
+  calGoal=parseInt(document.getElementById('cal-goal-input').value)||2000;
+  document.getElementById('cal-goal-lbl').textContent=calGoal;
+  save('calGoal',calGoal);
+  updateRing();
+  showToast('Goal updated');
+}
+
+function addFood(){
+  const name=document.getElementById('food-name').value.trim();
+  const kcal=parseInt(document.getElementById('food-kcal').value)||0;
+  const protein=parseInt(document.getElementById('food-protein').value)||0;
+  const carbs=parseInt(document.getElementById('food-carbs').value)||0;
+  const fat=parseInt(document.getElementById('food-fat').value)||0;
+  if(!name)return;
+  foods.push({name,kcal,protein,carbs,fat});
+  save('foods_'+todayKey,foods);
+  ['food-name','food-kcal','food-protein','food-carbs','food-fat'].forEach(id=>document.getElementById(id).value='');
+  renderFoods();
+  showToast('Food logged');
+}
+
+function removeFood(i){
+  foods.splice(i,1);
+  save('foods_'+todayKey,foods);
+  renderFoods();
+}
+
+function clearToday(){
+  if(!confirm('Clear all food for today?'))return;
+  foods=[];
+  save('foods_'+todayKey,foods);
+  renderFoods();
+}
+
+function renderFoods(){
+  const totKcal=foods.reduce((a,f)=>a+f.kcal,0);
+  document.getElementById('cal-consumed').textContent=totKcal;
+  document.getElementById('m-protein').textContent=foods.reduce((a,f)=>a+f.protein,0)+'g';
+  document.getElementById('m-carbs').textContent=foods.reduce((a,f)=>a+f.carbs,0)+'g';
+  document.getElementById('m-fat').textContent=foods.reduce((a,f)=>a+f.fat,0)+'g';
+  updateRing(totKcal);
+  const el=document.getElementById('food-list');
+  if(!foods.length){el.innerHTML='<p class="hint">No food logged yet.</p>';return;}
+  el.innerHTML='<div>'+foods.map((f,i)=>`
+    <div class="fitem">
+      <div><div style="font-size:14px;font-weight:500;color:#e8e8e8">${f.name}</div>
+      <div style="font-size:11px;color:#666">${f.kcal} kcal · P:${f.protein}g C:${f.carbs}g F:${f.fat}g</div></div>
+      <button class="dbtn" onclick="removeFood(${i})" aria-label="Remove"><i class="ti ti-trash"></i></button>
+    </div>`).join('')+'</div>';
+}
+
+function updateRing(c){
+  const consumed=c!=null?c:parseInt(document.getElementById('cal-consumed').textContent)||0;
+  const pct=Math.min(consumed/calGoal,1);
+  document.getElementById('cal-ring').setAttribute('stroke-dashoffset',Math.round(364.4-pct*364.4));
+  document.getElementById('cal-ring').setAttribute('stroke',consumed>calGoal?'#f09595':'#c8ff00');
+}
+
+// ── AI Workout Coach ──────────────────────────────────
+async function getWorkoutPlan(){
+  const age=document.getElementById('aw-age').value;
+  const weight=document.getElementById('aw-weight').value;
+  const height=document.getElementById('aw-height').value;
+  const days=document.getElementById('aw-days').value;
+  const goal=document.getElementById('aw-goal').value;
+  const level=document.getElementById('aw-level').value;
+  if(!goal||!level){showToast('Pick a goal and level first');return;}
+  save('awProfile',{age,weight,height,days,goal,level});
+  const resp=document.getElementById('aw-response');
+  resp.innerHTML='<p class="hint">Building your plan...</p>';
+  const prompt=`You are a certified personal trainer. Create a concise weekly workout plan for:
+Age: ${age||'not given'}, Weight: ${weight?weight+' lbs':'not given'}, Height: ${height?height+' in':'not given'}, Training days/week: ${days||'not given'}, Goal: ${goal}, Level: ${level}.
+Give a clear day-by-day breakdown with exercises, sets, and reps. Be specific and motivating. Plain text only, no markdown # symbols.`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await r.json();
+    const text=data.content.map(b=>b.text||'').join('');
+    resp.innerHTML='<div class="ai-box">'+text+'</div>';
+    save('awPlan',text);
+  }catch(e){resp.innerHTML='<p style="color:#f09595;font-size:13px">Error reaching AI. Check your connection.</p>';}
+}
+
+// ── AI Nutrition ──────────────────────────────────────
+async function getNutritionPlan(){
+  const age=document.getElementById('an-age').value;
+  const weight=document.getElementById('an-weight').value;
+  const height=document.getElementById('an-height').value;
+  const bmi=document.getElementById('an-bmi').value;
+  const goal=document.getElementById('an-goal').value;
+  const activity=document.getElementById('an-activity').value;
+  const diet=document.getElementById('an-diet').value;
+  if(!goal||!activity){showToast('Pick a goal and activity level first');return;}
+  save('anProfile',{age,weight,height,bmi,goal,activity,diet});
+  const resp=document.getElementById('an-response');
+  resp.innerHTML='<p class="hint">Calculating your plan...</p>';
+  const prompt=`You are a registered dietitian. Create a personalized daily nutrition plan for:
+Age: ${age||'not given'}, Weight: ${weight?weight+' lbs':'not given'}, Height: ${height?height+' in':'not given'}, BMI: ${bmi||'not given'}, Goal: ${goal}, Activity: ${activity}, Diet: ${diet||'no restrictions'}.
+Include: daily calorie target, macro breakdown (protein/carbs/fat in grams), and a full sample day of meals with calorie counts. Be specific and practical. Plain text only, no markdown # symbols.`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await r.json();
+    const text=data.content.map(b=>b.text||'').join('');
+    resp.innerHTML='<div class="ai-box">'+text+'</div>';
+    save('anPlan',text);
+  }catch(e){resp.innerHTML='<p style="color:#f09595;font-size:13px">Error reaching AI. Check your connection.</p>';}
+}
+
+// ── Rank ──────────────────────────────────────────────
+const tiers=[
+  {name:'Untrained',min:0,max:0.75,color:'#777',bg:'#222'},
+  {name:'Novice',min:0.75,max:1.25,color:'#85B7EB',bg:'#001a2e'},
+  {name:'Intermediate',min:1.25,max:1.75,color:'#EF9F27',bg:'#2e1e00'},
+  {name:'Advanced',min:1.75,max:2.25,color:'#5DCAA5',bg:'#04342c'},
+  {name:'Elite',min:2.25,max:3.0,color:'#c8ff00',bg:'#1a2e00'},
+  {name:'Godlike',min:3.0,max:999,color:'#ff6b6b',bg:'#2e0000'},
+];
+function getTier(r){return tiers.find(t=>r>=t.min&&r<t.max)||tiers[0];}
+
+function calcRank(){
+  const bench=parseFloat(document.getElementById('r-bench').value)||0;
+  const squat=parseFloat(document.getElementById('r-squat').value)||0;
+  const dead=parseFloat(document.getElementById('r-dead').value)||0;
+  const bw=parseFloat(document.getElementById('r-bw').value)||1;
+  save('rank',{bench,squat,dead,bw});
+  if(!bench&&!squat&&!dead){document.getElementById('rank-result').style.display='none';return;}
+  document.getElementById('rank-result').style.display='block';
+  const br=bench/bw,sr=squat/bw,dr=dead/bw;
+  const avg=(br+sr+dr)/3;
+  const overall=getTier(avg);
+  document.getElementById('rank-title').textContent=overall.name;
+  document.getElementById('rank-title').style.color=overall.color;
+  document.getElementById('rank-subtitle').textContent='Avg '+avg.toFixed(2)+'x bodyweight';
+  const setLift=(ratioId,barId,lblId,ratio)=>{
+    const tier=getTier(ratio);
+    document.getElementById(barId).style.width=Math.min(Math.round(ratio/3.5*100),100)+'%';
+    document.getElementById(barId).style.background=tier.color;
+    document.getElementById(lblId).textContent=tier.name+'  '+ratio.toFixed(2)+'x';
+    document.getElementById(lblId).style.color=tier.color;
+    document.getElementById(lblId).style.background=tier.bg;
+    document.getElementById(ratioId).textContent=ratio.toFixed(2)+'x BW';
+  };
+  setLift('bench-ratio','bench-bar','bench-rank-lbl',br);
+  setLift('squat-ratio','squat-bar','squat-rank-lbl',sr);
+  setLift('dead-ratio','dead-bar','dead-rank-lbl',dr);
+  document.getElementById('total-lifted').textContent=(bench+squat+dead)+' lbs total';
+}
+
+// ── Init renders ──────────────────────────────────────
+renderExercises();
+renderFoods();
+if(savedRank.bench||savedRank.squat||savedRank.dead)calcRank();
+
+// restore saved AI plans
+const savedAwPlan=load('awPlan',null);
+if(savedAwPlan)document.getElementById('aw-response').innerHTML='<div class="ai-box">'+savedAwPlan+'</div>';
+const savedAnPlan=load('anPlan',null);
+if(savedAnPlan)document.getElementById('an-response').innerHTML='<div class="ai-box">'+savedAnPlan+'</div>';
+
+// ── Service Worker ────────────────────────────────────
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
