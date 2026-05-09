@@ -61,8 +61,12 @@ html,body{height:100%;background:#0d0d0d;font-family:-apple-system,BlinkMacSyste
 .toast.show{opacity:1}
 .cal-ring-wrap{display:flex;justify-content:center;padding:10px 0 8px}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
-.key-banner{background:#1a2e00;border:0.5px solid #2a4400;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#aaa;display:flex;align-items:center;gap:10px}
-.key-banner i{color:#c8ff00;font-size:18px;flex-shrink:0}
+.key-banner{background:#1a1a2e;border:0.5px solid #2a2a44;border-radius:14px;padding:14px;margin-bottom:14px}
+.key-banner-title{font-size:14px;font-weight:600;color:#c8ff00;margin-bottom:4px}
+.key-banner-sub{font-size:12px;color:#777;margin-bottom:10px}
+.key-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.change-key-btn{background:none;border:0.5px solid #333;border-radius:8px;color:#666;font-size:11px;padding:5px 10px;cursor:pointer;font-family:inherit;margin-top:6px}
+.change-key-btn:hover{color:#aaa;border-color:#555}
 </style>
 </head>
 <body>
@@ -139,13 +143,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <!-- AI WORKOUT COACH -->
     <div class="screen" id="s-aiworkout">
       <div class="key-banner" id="aw-key-banner">
-        <i class="ti ti-key"></i>
-        <div style="flex:1">
-          <div style="color:#c8ff00;font-weight:600;margin-bottom:4px">Gemini API key required</div>
-          <input class="di" id="gemini-key" placeholder="Paste your free Gemini API key here" style="font-size:13px;padding:8px 10px">
-          <button class="bp" style="margin-top:8px;margin-bottom:0;padding:10px;font-size:13px" onclick="saveKey()">Save key</button>
-          <p style="font-size:11px;color:#666;margin-top:8px">Get a free key at aistudio.google.com — no credit card needed</p>
-        </div>
+        <div class="key-banner-title">Claude API key required</div>
+        <div class="key-banner-sub">Get a free key at console.anthropic.com — paste it below and it's saved to your device</div>
+        <input class="di" id="claude-key-input" placeholder="sk-ant-..." style="margin-bottom:8px;font-size:13px">
+        <button class="bp" style="margin-bottom:0;padding:11px" onclick="saveKey()">Save key</button>
+      </div>
+      <div id="key-saved-row" style="display:none;margin-bottom:14px;display:none">
+        <button class="change-key-btn" onclick="resetKey()"><i class="ti ti-key" style="font-size:12px;vertical-align:-1px;margin-right:4px"></i>Change API key</button>
       </div>
       <div class="card">
         <div class="slbl" style="margin-bottom:12px">Your profile</div>
@@ -279,14 +283,11 @@ function load(key,def){try{const v=localStorage.getItem('ironlog_'+key);return v
 let exercises=load('exercises_'+todayKey,[]);
 let foods=load('foods_'+todayKey,[]);
 let calGoal=load('calGoal',2000);
-let geminiKey=load('geminiKey','');
+let claudeKey=load('claudeKey','');
 
 document.getElementById('cal-goal-input').value=calGoal;
 document.getElementById('cal-goal-lbl').textContent=calGoal;
-
-if(geminiKey){
-  document.getElementById('aw-key-banner').style.display='none';
-}
+updateKeyUI();
 
 const savedRank=load('rank',{});
 if(savedRank.bench)document.getElementById('r-bench').value=savedRank.bench;
@@ -311,6 +312,36 @@ if(savedAN.goal)document.getElementById('an-goal').value=savedAN.goal;
 if(savedAN.activity)document.getElementById('an-activity').value=savedAN.activity;
 if(savedAN.diet)document.getElementById('an-diet').value=savedAN.diet;
 
+function updateKeyUI(){
+  const banner=document.getElementById('aw-key-banner');
+  const savedRow=document.getElementById('key-saved-row');
+  if(claudeKey){
+    banner.style.display='none';
+    savedRow.style.display='block';
+  } else {
+    banner.style.display='block';
+    savedRow.style.display='none';
+  }
+}
+
+function saveKey(){
+  const k=document.getElementById('claude-key-input').value.trim();
+  if(!k){showToast('Paste your API key first');return;}
+  claudeKey=k;
+  save('claudeKey',k);
+  updateKeyUI();
+  showToast('API key saved!');
+}
+
+function resetKey(){
+  if(!confirm('Reset your API key?'))return;
+  claudeKey='';
+  save('claudeKey','');
+  document.getElementById('claude-key-input').value='';
+  updateKeyUI();
+  showToast('Key cleared');
+}
+
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
@@ -323,15 +354,6 @@ function switchTab(name){
   document.getElementById('s-'+name).classList.add('active');
   document.getElementById('t-'+name).classList.add('active');
   if(name==='rank'&&(document.getElementById('r-bench').value||document.getElementById('r-squat').value))calcRank();
-}
-
-function saveKey(){
-  const k=document.getElementById('gemini-key').value.trim();
-  if(!k){showToast('Paste your API key first');return;}
-  geminiKey=k;
-  save('geminiKey',k);
-  document.getElementById('aw-key-banner').style.display='none';
-  showToast('API key saved!');
 }
 
 function addExercise(){
@@ -414,13 +436,16 @@ function updateRing(c){
   document.getElementById('cal-ring').setAttribute('stroke',consumed>calGoal?'#f09595':'#c8ff00');
 }
 
-async function callGemini(prompt){
-  if(!geminiKey){showToast('Add your Gemini API key first');return null;}
-  const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`;
-  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+async function callClaude(prompt){
+  if(!claudeKey){showToast('Add your API key first');return null;}
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':claudeKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+  });
   const data=await r.json();
-  if(data.error){throw new Error(data.error.message);}
-  return data.candidates[0].content.parts[0].text;
+  if(data.error)throw new Error(data.error.message);
+  return data.content.map(b=>b.text||'').join('');
 }
 
 async function getWorkoutPlan(){
@@ -436,9 +461,9 @@ async function getWorkoutPlan(){
   resp.innerHTML='<p class="hint">Building your plan...</p>';
   const prompt=`You are a certified personal trainer. Create a concise weekly workout plan for:
 Age: ${age||'not given'}, Weight: ${weight?weight+' lbs':'not given'}, Height: ${height?height+' in':'not given'}, Training days/week: ${days||'not given'}, Goal: ${goal}, Level: ${level}.
-Give a clear day-by-day breakdown with exercises, sets, and reps. Be specific and motivating. Plain text only, no markdown # symbols.`;
+Give a clear day-by-day breakdown with exercises, sets, and reps. Be specific and motivating. Plain text only, no markdown symbols.`;
   try{
-    const text=await callGemini(prompt);
+    const text=await callClaude(prompt);
     if(!text)return;
     resp.innerHTML='<div class="ai-box">'+text+'</div>';
     save('awPlan',text);
@@ -459,9 +484,9 @@ async function getNutritionPlan(){
   resp.innerHTML='<p class="hint">Calculating your plan...</p>';
   const prompt=`You are a registered dietitian. Create a personalized daily nutrition plan for:
 Age: ${age||'not given'}, Weight: ${weight?weight+' lbs':'not given'}, Height: ${height?height+' in':'not given'}, BMI: ${bmi||'not given'}, Goal: ${goal}, Activity: ${activity}, Diet: ${diet||'no restrictions'}.
-Include: daily calorie target, macro breakdown in grams, and a full sample day of meals with calorie counts. Be specific. Plain text only, no markdown # symbols.`;
+Include: daily calorie target, macro breakdown in grams, and a full sample day of meals with calorie counts. Be specific. Plain text only, no markdown symbols.`;
   try{
-    const text=await callGemini(prompt);
+    const text=await callClaude(prompt);
     if(!text)return;
     resp.innerHTML='<div class="ai-box">'+text+'</div>';
     save('anPlan',text);
