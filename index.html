@@ -228,8 +228,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <div class="screen" id="s-aifood">
       <div class="card">
         <div class="slbl" style="margin-bottom:12px">Your details</div>
-        <div class="irow"><input class="di" id="an-age" placeholder="Age" type="number"><input class="di" id="an-weight" placeholder="Weight (lbs)" type="number"></div>
-        <div class="irow"><input class="di" id="an-height" placeholder="Height (in)" type="number"><input class="di" id="an-bmi" placeholder="BMI (optional)" type="number" step="0.1"></div>
+        <div class="irow"><input class="di" id="an-age" placeholder="Age" type="number"><input class="di" id="an-height" placeholder="Height (in)" type="number"></div>
+        <div class="irow"><input class="di" id="an-weight" placeholder="Current weight (lbs)" type="number"><input class="di" id="an-target-weight" placeholder="Target weight (lbs)" type="number"></div>
+        <div class="irow"><input class="di" id="an-bmi" placeholder="BMI (optional)" type="number" step="0.1"><input class="di" id="an-timeline" placeholder="Timeline (e.g. 3 months)"></div>
         <div class="goal-picker" style="margin-bottom:12px">
           <div class="goal-picker-label">Goal — pick all that apply</div>
           <div class="goal-pills" id="an-goal-pills">
@@ -372,6 +373,8 @@ if(savedAW.level)document.getElementById('aw-level').value=savedAW.level;
 const savedAN=load('anProfile',{});
 if(savedAN.age)document.getElementById('an-age').value=savedAN.age;
 if(savedAN.weight)document.getElementById('an-weight').value=savedAN.weight;
+if(savedAN.targetWeight)document.getElementById('an-target-weight').value=savedAN.targetWeight;
+if(savedAN.timeline)document.getElementById('an-timeline').value=savedAN.timeline;
 if(savedAN.height)document.getElementById('an-height').value=savedAN.height;
 if(savedAN.bmi)document.getElementById('an-bmi').value=savedAN.bmi;
 if(savedAN.goals)restoreGoalPills('an-goal-pills',savedAN.goals);
@@ -542,24 +545,45 @@ Give a day-by-day breakdown with exercises, sets, and reps tailored to ALL the s
 async function getNutritionPlan(){
   const age=document.getElementById('an-age').value;
   const weight=document.getElementById('an-weight').value;
+  const targetWeight=document.getElementById('an-target-weight').value;
   const height=document.getElementById('an-height').value;
   const bmi=document.getElementById('an-bmi').value;
+  const timeline=document.getElementById('an-timeline').value;
   const goals=getGoals('an-goal-pills');
   const activity=document.getElementById('an-activity').value;
   const diet=document.getElementById('an-diet').value;
   if(!goals.length||!activity){showToast('Pick at least one goal and activity level');return;}
-  save('anProfile',{age,weight,height,bmi,goals,activity,diet});
+  save('anProfile',{age,weight,targetWeight,height,bmi,timeline,goals,activity,diet});
   const resp=document.getElementById('an-response');
   resp.innerHTML='<p class="hint">Calculating your plan...</p>';
+  const weightContext=weight&&targetWeight?`Current weight: ${weight} lbs, Target weight: ${targetWeight} lbs (${parseFloat(targetWeight)-parseFloat(weight)>0?'gaining':'losing'} ${Math.abs(parseFloat(targetWeight)-parseFloat(weight)).toFixed(0)} lbs)`:(weight?`Weight: ${weight} lbs`:'Weight: not given');
   const prompt=`Create a personalized daily nutrition plan for:
-Age: ${age||'not given'}, Weight: ${weight?weight+' lbs':'not given'}, Height: ${height?height+' in':'not given'}, BMI: ${bmi||'not given'}, Goals: ${goals.join(', ')}, Activity: ${activity}, Diet: ${diet||'no restrictions'}.
-Tailor the calorie target and macros to ALL stated goals simultaneously. Include daily calorie target, macro breakdown in grams, and a full sample day of meals with calorie counts. Be specific.`;
+Age: ${age||'not given'}, ${weightContext}, Height: ${height?height+' in':'not given'}, BMI: ${bmi||'not given'}, Timeline: ${timeline||'not given'}, Goals: ${goals.join(', ')}, Activity: ${activity}, Diet: ${diet||'no restrictions'}.
+Tailor the calorie target and macros precisely to hit the target weight within the timeline if given. Include:
+1. Daily calorie target (be specific based on the weight goal and timeline)
+2. Macro breakdown in grams (protein/carbs/fat)
+3. A full sample day of meals with calorie counts
+Also include a note on how the calorie target was calculated. Be specific and practical.`;
   try{
     const text=await callGroq(prompt);
     if(!text)return;
-    resp.innerHTML='<div class="ai-box">'+text+'</div>';
+    // Try to extract calorie number from response to offer sync
+    const calMatch=text.match(/(\d{3,4})\s*(?:calories|kcal|cal)/i);
+    const suggestedCal=calMatch?parseInt(calMatch[1]):null;
+    const syncBtn=suggestedCal?`<button onclick="syncCalGoal(${suggestedCal})" style="background:#1a2e00;border:0.5px solid #4a7a00;color:#c8ff00;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;width:100%;cursor:pointer;font-family:inherit;margin-top:10px"><i class="ti ti-arrow-right" style="margin-right:6px"></i>Sync ${suggestedCal} kcal to calorie tracker</button>`:'';
+    resp.innerHTML='<div class="ai-box">'+text+'</div>'+syncBtn;
     save('anPlan',text);
+    save('anPlanCal',suggestedCal);
   }catch(e){resp.innerHTML='<p style="color:#f09595;font-size:13px">Error: '+e.message+'</p>';}
+}
+
+function syncCalGoal(kcal){
+  calGoal=kcal;
+  document.getElementById('cal-goal-input').value=kcal;
+  document.getElementById('cal-goal-lbl').textContent=kcal;
+  save('calGoal',kcal);
+  updateRing();
+  showToast('Calorie goal synced to '+kcal+' kcal!');
 }
 
 // ── Rank ──────────────────────────────────────────────
@@ -608,7 +632,11 @@ if(savedRank.bench||savedRank.squat||savedRank.dead)calcRank();
 const savedAwPlan=load('awPlan',null);
 if(savedAwPlan)document.getElementById('aw-response').innerHTML='<div class="ai-box">'+savedAwPlan+'</div>';
 const savedAnPlan=load('anPlan',null);
-if(savedAnPlan)document.getElementById('an-response').innerHTML='<div class="ai-box">'+savedAnPlan+'</div>';
+const savedAnCal=load('anPlanCal',null);
+if(savedAnPlan){
+  const syncBtn=savedAnCal?`<button onclick="syncCalGoal(${savedAnCal})" style="background:#1a2e00;border:0.5px solid #4a7a00;color:#c8ff00;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;width:100%;cursor:pointer;font-family:inherit;margin-top:10px"><i class="ti ti-arrow-right" style="margin-right:6px"></i>Sync ${savedAnCal} kcal to calorie tracker</button>`:'';
+  document.getElementById('an-response').innerHTML='<div class="ai-box">'+savedAnPlan+'</div>'+syncBtn;
+}
 
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
 </script>
